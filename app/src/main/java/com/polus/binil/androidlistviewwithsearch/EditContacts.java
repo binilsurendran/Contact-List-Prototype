@@ -63,6 +63,7 @@ public class EditContacts extends Activity {
     String idValue;
 
     Bitmap contact_bitmap;
+    Boolean imageflag = false;
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
@@ -159,8 +160,11 @@ public class EditContacts extends Activity {
                         if (inputStream != null) {
                             photo = BitmapFactory.decodeStream(inputStream);
                             //  Log.e("Tag", "Photo " + photo);
-
                             contact_image.setImageBitmap(photo);
+                        }
+                        else
+                        {
+                            imageflag = true;
                         }
 
                         assert inputStream != null;
@@ -256,9 +260,15 @@ public class EditContacts extends Activity {
 
         if(!edt_contact_name.getText().toString().trim().equals("") && !edt_contactNumber.getText().toString().trim().equals(""))
         {
+
+
+
             if(isValidEmail(edt_contactEmail.getText().toString().trim()))
             {
-                Log.e("Tag ","valid Contacts");
+                Log.e("Tag ","imageflag " + imageflag);
+                //updateContact(idValue, edt_contact_name.getText().toString().trim(), edt_contactNumber.getText().toString().trim(), edt_contactEmail.getText().toString(), contact_bitmap);
+               Log.e("Tag ","valid Contacts");
+
 
                 ContentResolver contentResolver  = getContentResolver();
 
@@ -303,27 +313,44 @@ public class EditContacts extends Activity {
                         .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, edt_contactNumber.getText().toString().trim())
                         .build());
 
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                if(contact_bitmap!=null){    // If an image is selected successfully
-                    //  contact_bitmap.compress(Bitmap.CompressFormat.PNG, 75, stream);
-                    Log.e("Tag ","Update Image");
-                    contact_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
-                    byte[] b = stream.toByteArray();
-                    // Adding insert operation to operations list
-                    ops.add(ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
-                            .withSelection(ContactsContract.Data._ID + " = ?", new String[]{Integer.toString(photoRow)})
-                            .withValue(ContactsContract.Data.RAW_CONTACT_ID, idValue)
-                            .withValue(ContactsContract.Data.IS_SUPER_PRIMARY, 1)
-                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
-                            .withValue(ContactsContract.Data.DATA15, b)
-                            .build());
+                ByteArrayOutputStream image = new ByteArrayOutputStream();
+                // bitmap.compress(Bitmap.CompressFormat.PNG, 80, image);
 
-                    try {
-                        stream.flush();
-                    }catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+
+
+
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+
+                            Log.e("Tag ", "with image ");
+
+                            if (contact_bitmap != null) {    // If an image is selected successfully
+                                //  contact_bitmap.compress(Bitmap.CompressFormat.PNG, 75, stream);
+                                contact_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                                byte[] bytes = stream.toByteArray();
+                                ops.add(ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                                        .withSelection(ContactsContract.Data.CONTACT_ID + "=? AND " +
+                                                ContactsContract.Data.MIMETYPE + "=?", new String[]{idValue, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE})
+                                        .withValue(ContactsContract.Data.IS_SUPER_PRIMARY, 1)
+                                        .withValue(ContactsContract.Contacts.Photo.PHOTO, bytes)
+                                        .build());
+
+                                try {
+                                    stream.flush();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+
+
+
+
+
+                    //stream.flush();
+
+
+
 
 
                 try {
@@ -333,7 +360,12 @@ public class EditContacts extends Activity {
                     finish();
                     startActivity(i);
 
-                } catch (RemoteException e) {
+                }
+                catch (IllegalArgumentException e)
+                {
+
+                }
+                catch (RemoteException e) {
                     e.printStackTrace();
                 } catch (OperationApplicationException e) {
                     e.printStackTrace();
@@ -341,7 +373,7 @@ public class EditContacts extends Activity {
             }
             else if(edt_contactEmail.getText().toString().trim().equals(""))
             {
-
+             //   updateContact(idValue, edt_contact_name.getText().toString().trim(), edt_contactNumber.getText().toString().trim(), contact_bitmap);
                 ContentResolver contentResolver  = getContentResolver();
 
                 String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
@@ -363,6 +395,26 @@ public class EditContacts extends Activity {
                         .withSelection(where,numberParams)
                         .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, edt_contactNumber.getText().toString().trim())
                         .build());
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                if(contact_bitmap!=null){    // If an image is selected successfully
+                    //  contact_bitmap.compress(Bitmap.CompressFormat.PNG, 75, stream);
+                    contact_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                    byte[] bytes = stream.toByteArray();
+
+                    ops.add(ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
+                            .withSelection(ContactsContract.Data.CONTACT_ID + "=? AND " +
+                                    ContactsContract.Data.MIMETYPE + "=?", new String[]{idValue, ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE})
+                            .withValue(ContactsContract.Data.IS_SUPER_PRIMARY, 1)
+                            .withValue(ContactsContract.Contacts.Photo.PHOTO, bytes)
+                            .build());
+                    //stream.flush();
+
+                    try {
+                        stream.flush();
+                    }catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 try {
                     contentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
@@ -433,9 +485,12 @@ public class EditContacts extends Activity {
 
     public void setImage(View v)
     {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        startActivityForResult(intent, 1);
+           if(!imageflag) {
+               Intent intent = new Intent(Intent.ACTION_PICK);
+               intent.setType("image/*");
+               startActivityForResult(intent, 1);
+           }
+
     }
 
     @Override
@@ -464,6 +519,12 @@ public class EditContacts extends Activity {
             }
         }
     }
+
+
+
+
+
+
 
     public final static boolean isValidEmail(CharSequence target) {
         return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
