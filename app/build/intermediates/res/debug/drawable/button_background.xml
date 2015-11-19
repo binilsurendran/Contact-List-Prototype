@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:state_pressed="true" >
+        <shape android:shape="rectangle"  >
+            <corners android:radius="10dip" />
+            <stroke android:width="1dip" android:color="#5e7974" />
+            <gradient android:angle="-90" android:startColor="#345953" android:endColor="#689a92"  />
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle"  >
+            <corners android:radius="10dip" />
+            <stroke android:width="1dip" android:color="#5e7974" />
+            <solid android:color="#58857e"/>
+        </shape>
+    </item>
+    <item >
+        <shape android:shape="rectangle"  >
+            <corners android:radius="10dip" />
+            <stroke android:width="1dip" android:color="#0084a3" />
+            <gradient android:angle="-90" android:startColor="#0084a3" android:endColor="#5fa2b2" />
+        </shape>
+    </item>
+</selector><!-- From: file:/E:/Project%20Details/Hd%20Dailer/proto/Working%20Proto/ContactListProto/app/src/main/res/drawable/button_background.xml -->

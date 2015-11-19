@@ -1,0 +1,2 @@
+E:\Project Details\Hd Dailer\proto\Searchable-RecyclerView-Demo-master\ContactListProto\app\build\intermediates\classes\release
+E:\Project Details\Hd Dailer\proto\Searchable-RecyclerView-Demo-master\ContactListProto\app\build\intermediates\pre-dexed\release\support-v4-18.0.0-520fdee7e353cf8ad42010407d4f37b6bd4b4a98.jar
